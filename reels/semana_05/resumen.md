@@ -39,6 +39,6 @@
 
 ## Destacados
 
-- **El más seguro** · LV @ NE: El pick con más confianza de la semana: NE gana con 75%
-- **La moneda al aire** · BAL @ ATL: Prácticamente 50-50: el partido más parejo de la semana
-- **La sorpresa** · CLE @ NYJ: Las Vegas va con NYJ (54%). El modelo va con CLE (59%).
+- **El más seguro** · LV @ NE: El pick con más confianza de la semana: NE gana con 75.4%
+- **La moneda al aire** · BAL @ ATL: Solo 0.8 puntos de diferencia: el partido más parejo de la semana
+- **La sorpresa** · CLE @ NYJ: Las Vegas va con NYJ (54.3%). El modelo va con CLE (58.9%).

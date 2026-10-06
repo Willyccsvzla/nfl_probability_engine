@@ -119,6 +119,22 @@ ZONAS_CORTAS = {"America/Mexico_City": "CDMX", "America/New_York": "ET",
                 "Europe/Madrid": "Madrid"}
 
 
+DECIMALES = 1   # decimales en las probabilidades que se muestran
+
+
+def fmt_pct(p, d=DECIMALES):
+    """0.5012 -> '50.1%'"""
+    return f"{p:.{d}%}"
+
+
+def fmt_par(p_a, p_b, d=DECIMALES):
+    """
+    Formatea dos probabilidades complementarias para que siempre sumen 100.
+    Redondea la primera y la segunda es 100 menos la primera, para evitar
+    casos como 50.1% vs 50.0%.
+    """
+    a = round(p_a * 100, d)
+    return f"{a:.{d}f}%", f"{100 - a:.{d}f}%"
 # ══════════════════════════════════════════════════════════════════════════════
 # 1 · Datos — lo mismo que hace el Notebook 05
 # ══════════════════════════════════════════════════════════════════════════════
@@ -399,18 +415,19 @@ def comentario_partido(r, rec, rank):
     elo_r = float(r.elo_away_pre if r.fav_local else r.elo_home_pre)
     rk_f, rk_r = rank.get(fav, "–"), rank.get(riv, "–")
 
-    # 1 · Probabilidad (con el mismo % redondeado que se ve en la imagen)
-    pct = int(f"{p:.0%}"[:-1])
-    if pct >= 75:
-        f1 = f"{fav}, favorito claro: gana {pct}% de las veces."
-    elif pct >= 65:
-        f1 = f"{fav} llega como favorito sólido ({pct}%)."
-    elif pct >= 57:
-        f1 = f"Ligera ventaja para {fav} ({pct}%), pero hay partido."
-    elif pct >= 53:
-        f1 = f"Muy parejo: {fav} apenas por delante ({pct}%)."
+    # 1 · Probabilidad (mismo valor redondeado que se ve en la imagen)
+    pct_num = round(p * 100, DECIMALES)   # 57.3 → para comparar contra los cortes
+    pct = fmt_pct(p)                      # '57.3%' → para el texto
+    if pct_num >= 75:
+        f1 = f"{fav}, favorito claro: gana {pct} de las veces."
+    elif pct_num >= 65:
+        f1 = f"{fav} llega como favorito sólido ({pct})."
+    elif pct_num >= 57:
+        f1 = f"Ligera ventaja para {fav} ({pct}), pero hay partido."
+    elif pct_num >= 53:
+        f1 = f"Muy parejo: {fav} apenas por delante ({pct})."
     else:
-        f1 = f"Moneda al aire: {fav} apenas {pct}%."
+        f1 = f"Moneda al aire: {fav} apenas {pct}."
 
     # 2 · Elo y localía
     dif = elo_f - elo_r
@@ -465,13 +482,15 @@ def elegir_destacados(week_games):
 
     r = g.loc[seguro]
     out = [("El más seguro", r,
-            f"El pick con más confianza de la semana:\n{r.favorito} gana con {r.p_fav:.0%}")]
+            f"El pick con más confianza de la semana:\n{r.favorito} gana con {fmt_pct(r.p_fav)}")]
 
     r = g.loc[moneda]
     # diferencia con los mismos % redondeados que se ven en la gráfica
-    dif = abs(int(f"{r.p_home_pre:.0%}"[:-1]) - int(f"{r.p_away_pre:.0%}"[:-1]))
-    arranque = "Prácticamente 50-50" if dif == 0 else \
-        f"Solo {dif} {'punto' if dif == 1 else 'puntos'} de diferencia"
+    # La moneda al aire: diferencia con los mismos valores que se ven en la imagen
+    a, b = fmt_par(r.p_home_pre, r.p_away_pre)
+    dif = round(abs(float(a[:-1]) - float(b[:-1])), DECIMALES)
+    arranque = ("Prácticamente 50-50" if dif == 0 else
+                f"Solo {dif:.{DECIMALES}f} {'punto' if dif == 1 else 'puntos'} de diferencia")
     out.append(("La moneda al aire", r, f"{arranque}:\nel partido más parejo de la semana"))
 
     if resto.empty:
@@ -487,16 +506,16 @@ def elegir_destacados(week_games):
         r, pv = resto.loc[idx], pv_pick[idx]
         vf = r.favorito if pv > 0.5 else r.rival
         if pv < 0.5:
-            texto = f"Las Vegas va con {vf} ({1 - pv:.0%}).\nEl modelo va con {r.favorito} ({r.p_fav:.0%})."
+            texto = f"Las Vegas va con {vf} ({fmt_pct(1 - pv)}).\nEl modelo va con {r.favorito} ({fmt_pct(r.p_fav)})."
         elif r.p_fav > pv:
-            texto = f"Las Vegas le da a {r.favorito} {pv:.0%}.\nEl modelo le tiene más fe: {r.p_fav:.0%}."
+            texto = f"Las Vegas le da a {r.favorito} {fmt_pct(pv)}.\nEl modelo le tiene más fe: {fmt_pct(r.p_fav)}."
         else:
-            texto = f"Las Vegas ve muy favorito a {r.favorito} ({pv:.0%}).\nEl modelo lo ve más parejo: {r.p_fav:.0%}."
+            texto = f"Las Vegas ve muy favorito a {r.favorito} ({fmt_pct(pv)}).\nEl modelo lo ve más parejo: {fmt_pct(r.p_fav)}."
     else:
         visita = resto[~resto["fav_local"]]
         idx = visita["p_fav"].idxmax() if not visita.empty else resto["p_away_pre"].idxmax()
         r = resto.loc[idx]
-        texto = f"El modelo ve ganar al visitante:\n{r.away_team} con {r.p_away_pre:.0%}"
+        texto = f"El modelo ve ganar al visitante:\n{r.away_team} con {fmt_pct(r.p_away_pre)}"
     out.append(("La sorpresa", r, texto))
     return out
 
@@ -859,7 +878,7 @@ def graf_picks(week_games, semana, threshold, ruta, zona=ZONA_HORARIA):
         bar.set_xlim(0, 1)
         bar.set_ylim(-0.5, 0.5)
         bar.axis("off")
-        fig.text(0.83, yc, f"{r.p_fav:.0%}", fontsize=18, fontweight="bold", va="center",
+        fig.text(0.83, yc, fmt_pct(r.p_fav), fontsize=17, fontweight="bold", va="center",
                  color=TINTA if es_pick else GRIS)
         y -= u
 
@@ -901,10 +920,13 @@ def graf_duelo(r, etiqueta, explicacion, ruta, zona=ZONA_HORARIA, rec=None, rank
     ax.set_ylim(-0.55, 0.55)
     ax.axis("off")
 
-    fig.text(0.08, 0.435, f"{p_vis:.0%}", fontsize=40, fontweight="bold", va="top",
-             color=ACENTO if fav_vis else GRIS)
-    fig.text(0.92, 0.435, f"{p_loc:.0%}", fontsize=40, fontweight="bold", va="top",
-             ha="right", color=GRIS if fav_vis else ACENTO)
+    txt_vis, txt_loc = fmt_par(p_vis, p_loc)
+
+    fig.text(0.08, 0.435, txt_vis, fontsize=40, fontweight="bold", va="top",
+         color=ACENTO if fav_vis else GRIS)
+    fig.text(0.92, 0.435, txt_loc, fontsize=40, fontweight="bold", va="top",
+            ha="right", color=GRIS if fav_vis else ACENTO)
+    
     def _rk(team):
         return f" (#{rank[team]})" if team in rank else ""
 
