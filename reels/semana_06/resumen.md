@@ -2,20 +2,20 @@
 
 ## ¿Cómo va el modelo? (semanas 1–5 · pick si prob. > 50%)
 
-- Récord del modelo en la temporada (aciertos-fallos): **45-33 (57.7%)**
-- Semana 5: 8-6 (57.1%)
-- Aciertos que el propio modelo esperaba: 48.2 → reales: 45
-- Brier: 0.228 (moneda al aire = 0.250) · Log loss: 0.646 (moneda = 0.693)
-- Cuando eligió al local: 30-22 · al visitante: 15-11
-- En esos mismos partidos, siempre el local: 41-37
-- Favorito de Las Vegas: 50-28 (64.1%) · el modelo coincide con Las Vegas en 83.3% de los picks · Brier Las Vegas: 0.229
+- Récord del modelo en la temporada (aciertos-fallos-empates): **45-33-1 (57.6%)**
+- Semana 5: 8-6-1 (56.7%)
+- Aciertos que el propio modelo esperaba: 48.8 → reales: 45.5 (empate = ½)
+- Brier: 0.225 (moneda al aire = 0.250) · Log loss: 0.647 (moneda = 0.693)
+- Cuando eligió al local: 30-22-1 · al visitante: 15-11
+- En esos mismos partidos, siempre el local: 41-37-1
+- Favorito de Las Vegas: 50-28-1 (63.9%) · el modelo coincide con Las Vegas en 83.5% de los picks · Brier Las Vegas: 0.226
 - El batacazo de la semana 5: **TB** ganó con solo 34% de probabilidad (TB 24–16 DAL)
 
 ### Calibración (temporada)
 
 | Confianza | Partidos | Récord | Prob. media | % real |
 |---|---|---|---|---|
-| 50–60% | 38 | 17-21 | 55% | 45% |
+| 50–60% | 39 | 17-21-1 | 55% | 45% |
 | 60–70% | 25 | 15-10 | 64% | 60% |
 | 70–80% | 15 | 13-2 | 75% | 87% |
 
@@ -40,4 +40,4 @@
 
 - **El más seguro** · WAS @ SF: El pick con más confianza de la semana: SF gana con 82.1%
 - **La moneda al aire** · CHI @ ATL: Solo 4.8 puntos de diferencia: el partido más parejo de la semana
-- **La sorpresa** · NO @ NYG: Las Vegas va con NO (51.1%). El modelo va con NYG (65.5%).
+- **La sorpresa** · CAR @ PHI: Las Vegas va con CAR (59.3%). El modelo va con PHI (63.3%).
